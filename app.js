@@ -94,10 +94,20 @@ function gridCorridorX(selector, columnIndex = 1, fallbackRatio = .5) {
 function sectionRouteAnchors(selector, x) {
   const section = document.querySelector(selector);
   if (!section) return [];
-  const inset = Math.min(section.offsetHeight * .2, Math.max(90, window.innerHeight * .2));
+  const inset = Math.min(section.offsetHeight * .28, Math.max(130, window.innerHeight * .3));
+  const protectedEntries = new Set(["#vantagens", "#perfil", "#territorios", "#duvidas"]);
+  const transitionExits = new Set(["#processo", "#vantagens", "#perfil", "#territorios"]);
+  const protectsVisualEntry = protectedEntries.has(selector);
+  const entryInset = protectsVisualEntry
+    ? Math.min(inset, Math.max(80, window.innerHeight * .12))
+    : inset;
+  const bottomPadding = parseFloat(getComputedStyle(section).paddingBottom) || inset;
+  const exitInset = transitionExits.has(selector) && journeyViewportWidth() > 720
+    ? Math.max(inset, bottomPadding - 72)
+    : inset;
   return [
-    { x, y: section.offsetTop + inset },
-    { x, y: section.offsetTop + section.offsetHeight - inset }
+    { x, y: section.offsetTop + entryInset, routeSection: selector, routeBoundary: "entry" },
+    { x, y: section.offsetTop + section.offsetHeight - exitInset, routeSection: selector, routeBoundary: "exit" }
   ];
 }
 
@@ -143,7 +153,7 @@ function buildJourneyRoute() {
     ["#vantagens", mobile ? mobileLane : gridCorridorX(".comparison-row", 2, .58)],
     ["#perfil", mobile ? mobileLane : gridCorridorX(".profile-grid", 1, .43)],
     ["#territorios", mobile ? mobileLane : gridCorridorX(".territory-layout", 1, .56)],
-    ["#duvidas", mobile ? mobileLane : gridCorridorX(".faq-grid", 1, .42)]
+    ["#duvidas", mobile ? mobileLane : gridCorridorX(".faq-grid", 1, .42) - clamp(viewportWidth * .025, 28, 48)]
   ];
   routeSections.forEach(([selector, x]) => anchors.push(...sectionRouteAnchors(selector, x)));
   anchors.push({ x: destinationEntrance?.x ?? journeyX(mobile ? .55 : tablet ? .5 : .55), y: journeyEndY });
@@ -152,11 +162,25 @@ function buildJourneyRoute() {
   for (let index = 1; index < anchors.length; index += 1) {
     const previous = anchors[index - 1];
     const current = anchors[index];
-    const controlY = (previous.y + current.y) * .5;
-    const finalSegment = index === anchors.length - 1;
-    const secondControlX = current.x;
-    const secondControlY = finalSegment ? current.y - Math.min(180, Math.max(70, (current.y - previous.y) * .24)) : controlY;
-    routeData += ` C ${previous.x} ${controlY}, ${secondControlX} ${secondControlY}, ${current.x} ${current.y}`;
+    const horizontalDistance = current.x - previous.x;
+    const verticalDistance = current.y - previous.y;
+    const curveSegments = Math.abs(horizontalDistance) > 1 ? 4 : 1;
+    const smootherStep = (amount) => amount ** 3 * (amount * (amount * 6 - 15) + 10);
+    const smootherSlope = (amount) => 30 * amount ** 2 * (amount - 1) ** 2;
+    for (let segment = 0; segment < curveSegments; segment += 1) {
+      const startAmount = segment / curveSegments;
+      const endAmount = (segment + 1) / curveSegments;
+      const interval = endAmount - startAmount;
+      const startX = previous.x + horizontalDistance * smootherStep(startAmount);
+      const startY = previous.y + verticalDistance * startAmount;
+      const endX = previous.x + horizontalDistance * smootherStep(endAmount);
+      const endY = previous.y + verticalDistance * endAmount;
+      const controlOneX = startX + horizontalDistance * smootherSlope(startAmount) * interval / 3;
+      const controlOneY = startY + verticalDistance * interval / 3;
+      const controlTwoX = endX - horizontalDistance * smootherSlope(endAmount) * interval / 3;
+      const controlTwoY = endY - verticalDistance * interval / 3;
+      routeData += ` C ${controlOneX} ${controlOneY}, ${controlTwoX} ${controlTwoY}, ${endX} ${endY}`;
+    }
   }
   [journeyRoute, journeyRouteDash, journeyRouteProgress].forEach((path) => path?.setAttribute("d", routeData));
   journeyRouteLength = Math.max(1, journeyRoute.getTotalLength());
@@ -177,7 +201,7 @@ function journeyPointAtY(documentY) {
   }
   const distance = (low + high) * .5;
   const point = journeyRoute.getPointAtLength(distance);
-  const maximumWindow = clamp(journeyViewportWidth() * .014, 12, 28);
+  const maximumWindow = clamp(journeyViewportWidth() * .022, 18, 44);
   const remaining = journeyRouteLength - distance;
   const tangentWindow = clamp(Math.min(maximumWindow, Math.max(5, remaining * .42)), 5, maximumWindow);
   const previous = journeyRoute.getPointAtLength(Math.max(0, distance - tangentWindow));
@@ -231,13 +255,18 @@ function renderJourney(scrollPosition) {
   if (!journeyLayer || !journeyVehicle || !journeyRoute || !journeyDestination) return;
   const destinationRange = Math.max(1, journeyDestination.offsetHeight - window.innerHeight);
   const destinationRawProgress = clamp((scrollPosition - journeyDestination.offsetTop) / destinationRange);
-  const destinationProgress = destinationRawProgress <= .25
-    ? lerp(0, .38, destinationRawProgress / .25)
-    : destinationRawProgress <= .72
-      ? lerp(.38, 1, (destinationRawProgress - .25) / .47)
+  const destinationProgress = destinationRawProgress <= .27
+    ? lerp(0, .38, destinationRawProgress / .27)
+    : destinationRawProgress <= .78
+      ? lerp(.38, 1, (destinationRawProgress - .27) / .51)
       : 1;
   const journeyEndScroll = journeyDestination.offsetTop + journeyDestination.offsetHeight;
   const loadingProgress = clamp(scrollPosition / Math.max(1, journeyStartScroll));
+  const loadingMotionProgress = loadingProgress <= .37
+    ? lerp(0, .42, loadingProgress / .37)
+    : loadingProgress <= .9
+      ? lerp(.42, .9, (loadingProgress - .37) / .53)
+      : loadingProgress;
   const departureProgress = clamp((loadingProgress - .9) / .1);
   const departureAcceleration = departureProgress * departureProgress * (2 - departureProgress);
   const roadAccelerationProgress = clamp((scrollPosition - journeyStartScroll) / Math.max(1, window.innerHeight * 1.35));
@@ -351,8 +380,8 @@ function renderJourney(scrollPosition) {
   journeyLayer.classList.toggle("is-driving", scrollPosition > journeyStartScroll && scrollPosition < journeyDestination.offsetTop);
   journeyLayer.classList.toggle("is-arriving", scrollPosition >= journeyDestination.offsetTop);
 
-  const cargoOneLoad = clamp((loadingProgress - .02) / .4);
-  const cargoTwoLoad = clamp((loadingProgress - .58) / .32);
+  const cargoOneLoad = clamp((loadingMotionProgress - .02) / .4);
+  const cargoTwoLoad = clamp((loadingMotionProgress - .58) / .32);
   const forkliftCycle = (progress) => {
     const approach = smooth(0, .2, progress);
     const contact = smooth(.2, .28, progress);
@@ -380,9 +409,9 @@ function renderJourney(scrollPosition) {
   const cargoOneSceneFade = 1 - smooth(.435, .455, destinationProgress);
   const cargoTwoSceneFade = 1 - smooth(.715, .735, destinationProgress);
   if (journeyLoader) {
-    const loaderFade = mobileSceneReveal * (1 - smooth(.895, .915, loadingProgress));
+    const loaderFade = mobileSceneReveal * (1 - smooth(.895, .915, loadingMotionProgress));
     const cargoScreenAngle = journeyVisualAngle;
-    const cargoSwitch = smooth(.42, .58, loadingProgress);
+    const cargoSwitch = smooth(.42, .58, loadingMotionProgress);
     const activeLift = lerp(cargoOneLift, cargoTwoLift, cargoSwitch);
     const activeEngage = lerp(cargoOneCycle.engage, cargoTwoCycle.engage, cargoSwitch);
     const activeTravel = lerp(cargoOneCycle.travel, cargoTwoCycle.travel, cargoSwitch);
@@ -412,6 +441,27 @@ function renderJourney(scrollPosition) {
       x: clamp(point.x, clearBounds.left + padding, clearBounds.right - padding),
       y: clamp(point.y, clearBounds.top + padding, clearBounds.bottom - padding)
     });
+    const tangentControlPoint = (origin, heading, desiredLength, padding = 0) => {
+      const radians = heading * Math.PI / 180;
+      const directionX = Math.cos(radians);
+      const directionY = Math.sin(radians);
+      const left = clearBounds.left + padding;
+      const right = clearBounds.right - padding;
+      const top = clearBounds.top + padding;
+      const bottom = clearBounds.bottom - padding;
+      const limits = [];
+      if (directionX > .001) limits.push((right - origin.x) / directionX);
+      else if (directionX < -.001) limits.push((left - origin.x) / directionX);
+      if (directionY > .001) limits.push((bottom - origin.y) / directionY);
+      else if (directionY < -.001) limits.push((top - origin.y) / directionY);
+      const availableLength = Math.min(...limits.filter((limit) => Number.isFinite(limit) && limit >= 0), desiredLength);
+      const minimumLength = 18 * motionScale;
+      const controlLength = Math.min(desiredLength, Math.max(minimumLength, availableLength * .88));
+      return {
+        x: origin.x + directionX * controlLength,
+        y: origin.y + directionY * controlLength
+      };
+    };
     const cubicPose = (start, controlOne, controlTwo, end, progress) => {
       const inverse = 1 - progress;
       const x = inverse ** 3 * start.x + 3 * inverse ** 2 * progress * controlOne.x + 3 * inverse * progress ** 2 * controlTwo.x + progress ** 3 * end.x;
@@ -419,6 +469,28 @@ function renderJourney(scrollPosition) {
       const tangentX = 3 * inverse ** 2 * (controlOne.x - start.x) + 6 * inverse * progress * (controlTwo.x - controlOne.x) + 3 * progress ** 2 * (end.x - controlTwo.x);
       const tangentY = 3 * inverse ** 2 * (controlOne.y - start.y) + 6 * inverse * progress * (controlTwo.y - controlOne.y) + 3 * progress ** 2 * (end.y - controlTwo.y);
       return { x, y, heading: Math.atan2(tangentY, tangentX) * 180 / Math.PI };
+    };
+    const cubicPoseByMotion = (start, controlOne, controlTwo, end, progress) => {
+      const sampleCount = 30;
+      const poses = [cubicPose(start, controlOne, controlTwo, end, 0)];
+      const costs = [0];
+      let totalCost = 0;
+      for (let sample = 1; sample <= sampleCount; sample += 1) {
+        const pose = cubicPose(start, controlOne, controlTwo, end, sample / sampleCount);
+        const previousPose = poses[sample - 1];
+        const distance = Math.hypot(pose.x - previousPose.x, pose.y - previousPose.y);
+        const headingDelta = Math.abs(((((pose.heading - previousPose.heading) % 360) + 540) % 360) - 180);
+        totalCost += distance + headingDelta * 1.45 * motionScale;
+        poses.push(pose);
+        costs.push(totalCost);
+      }
+      const targetCost = totalCost * clamp(progress);
+      let sample = 1;
+      while (sample < costs.length - 1 && costs[sample] < targetCost) sample += 1;
+      const segmentCost = Math.max(.0001, costs[sample] - costs[sample - 1]);
+      const localProgress = (targetCost - costs[sample - 1]) / segmentCost;
+      const curveProgress = lerp((sample - 1) / sampleCount, sample / sampleCount, localProgress);
+      return cubicPose(start, controlOne, controlTwo, end, curveProgress);
     };
     const supportReach = (lift) => (70 + lift * 10.4) * forkliftBaseScale;
     const sourceOneRaw = vehicleLocalToScreen(6, 177);
@@ -530,24 +602,22 @@ function renderJourney(scrollPosition) {
       if (timelineProgress < .42) return onePose;
       if (timelineProgress >= .58) return twoPose;
       const transfer = clamp((timelineProgress - .42) / .16);
-      const startRadians = onePose.heading * Math.PI / 180;
-      const endRadians = panelTwoSpec.sourceHeading * Math.PI / 180;
-      const transferPose = cubicPose(
-        { x: onePose.frontX, y: onePose.frontY },
-        clampToAisle({
-          x: onePose.frontX + Math.cos(startRadians) * 58 * motionScale,
-          y: onePose.frontY + Math.sin(startRadians) * 58 * motionScale
-        }, 44 * forkliftBaseScale),
-        clampToAisle({
-          x: panelTwoSpec.approachStart.x - Math.cos(endRadians) * 58 * motionScale,
-          y: panelTwoSpec.approachStart.y - Math.sin(endRadians) * 58 * motionScale
-        }, 44 * forkliftBaseScale),
-        panelTwoSpec.approachStart,
+      const transferStart = { x: onePose.frontX, y: onePose.frontY };
+      const transferEnd = panelTwoSpec.approachStart;
+      const transferDistance = Math.hypot(transferEnd.x - transferStart.x, transferEnd.y - transferStart.y);
+      const transferHandle = clamp(transferDistance * .4, 64 * motionScale, 124 * motionScale);
+      const transferControlOne = tangentControlPoint(transferStart, onePose.heading, transferHandle, 44 * forkliftBaseScale);
+      const transferControlTwo = tangentControlPoint(transferEnd, panelTwoSpec.sourceHeading + 180, transferHandle, 44 * forkliftBaseScale);
+      const transferPose = cubicPoseByMotion(
+        transferStart,
+        transferControlOne,
+        transferControlTwo,
+        transferEnd,
         smooth(0, 1, transfer)
       );
       return { frontX: transferPose.x, frontY: transferPose.y, heading: transferPose.heading, gear: 1 };
     };
-    const plan = forkliftPlanAt(loadingProgress);
+    const plan = forkliftPlanAt(loadingMotionProgress);
     let cameraShiftX = 0;
     let cameraShiftY = 0;
     if (mobileCameraAmount > 0) {
@@ -586,9 +656,9 @@ function renderJourney(scrollPosition) {
     applyRigidPanelPose(journeyCargoTwo, 87, panelPoseFor(cargoTwoCycle, panelTwoSpec));
     if (journeyCargoOne) journeyCargoOne.style.filter = `drop-shadow(0 ${lerp(3, 16, cargoOneLift)}px ${lerp(2, 9, cargoOneLift)}px rgba(5,16,7,${lerp(.18, .34, cargoOneLift)}))`;
     if (journeyCargoTwo) journeyCargoTwo.style.filter = `drop-shadow(0 ${lerp(3, 16, cargoTwoLift)}px ${lerp(2, 9, cargoTwoLift)}px rgba(5,16,7,${lerp(.18, .34, cargoTwoLift)}))`;
-    const nearStep = .0045;
-    const before = forkliftPlanAt(clamp(loadingProgress - nearStep));
-    const after = forkliftPlanAt(clamp(loadingProgress + nearStep));
+    const nearStep = .012;
+    const before = forkliftPlanAt(clamp(loadingMotionProgress - nearStep));
+    const after = forkliftPlanAt(clamp(loadingMotionProgress + nearStep));
     const steering = plan.heading;
     const travelledDistance = Math.hypot(after.frontX - before.frontX, after.frontY - before.frontY);
     const headingChange = ((((after.heading - before.heading) % 360) + 540) % 360) - 180;
@@ -634,7 +704,7 @@ function renderJourney(scrollPosition) {
       journeyLoaderUnderlay.style.setProperty("--forklift-engage", String(activeEngage));
     }
   }
-  if (journeyLoaderCable) journeyLoaderCable.style.opacity = String(mobileSceneReveal * (1 - smooth(.895, .915, loadingProgress)));
+  if (journeyLoaderCable) journeyLoaderCable.style.opacity = String(mobileSceneReveal * (1 - smooth(.895, .915, loadingMotionProgress)));
 
   const loadingSceneFade = 1 - departureAcceleration;
   const factoryRailOpacity = (mobileFactory ? .48 : .82) * loadingSceneFade * mobileSceneReveal;

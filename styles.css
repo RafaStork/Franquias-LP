@@ -247,6 +247,13 @@ p { line-height: 1.65; }
 .faq-list.faq-enhanced details.is-expanded .faq-answer p { opacity: 1; transform: none; transition-delay: .06s; }
 .faq-list.faq-enhanced details.is-closing summary span { color: var(--yellow); }
 
+@media (min-width: 721px) {
+  .process,
+  .comparison,
+  .profile,
+  .territory { padding-bottom: clamp(480px, 68vh, 640px); }
+}
+
 .lead-section { display: grid; grid-template-columns: minmax(0, .9fr) clamp(270px, 25vw, 350px) minmax(0, 1.1fr); min-height: 850px; background: var(--forest); color: #fff; }
 .lead-copy, .lead-form { min-width: 0; padding: clamp(70px, 8vw, 124px) clamp(30px, 4vw, 60px); }
 .lead-copy { position: relative; display: flex; flex-direction: column; justify-content: center; overflow: hidden; background: linear-gradient(145deg, #0f1d10, #294525); }
@@ -513,7 +520,7 @@ p { line-height: 1.65; }
 .logistics-motion.is-hidden { opacity: 0; }
 
 .motion-chapter { position: relative; isolation: isolate; }
-.motion-chapter--factory { --factory-loading-opacity: .82; height: 900svh; background: var(--forest-deep); }
+.motion-chapter--factory { --factory-loading-opacity: .82; height: 1020svh; background: var(--forest-deep); }
 .motion-chapter--factory .hero { position: sticky; top: 0; height: 100svh; min-height: 100svh; align-items: flex-start; padding-top: clamp(132px, 16vh, 176px); }
 .motion-chapter--factory .hero::before {
   content: "";
@@ -646,7 +653,7 @@ p { line-height: 1.65; }
 }
 
 @media (max-width: 720px) {
-  .motion-chapter--factory { --factory-loading-opacity: .48; height: 960svh; }
+  .motion-chapter--factory { --factory-loading-opacity: .48; height: 1080svh; }
   .motion-chapter--factory .hero { min-height: 100svh; height: 100svh; padding: 118px 20px 68px; align-items: flex-start; }
   .motion-chapter--factory .hero-copy { width: 100%; }
   .motion-chapter--factory .hero-structure { opacity: calc(.22 * var(--factory-obstruction-opacity, 1)); }
@@ -837,13 +844,15 @@ p { line-height: 1.65; }
 }
 .journey-forklift-wheel {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   left: 20px;
   width: 18px;
   height: 10px;
   border-radius: 4px;
   background: repeating-linear-gradient(90deg, #172017 0 4px, #354335 4px 6px);
   background-position-x: calc(var(--forklift-roll) * 1px);
+  transition: transform .2s cubic-bezier(.22,.61,.36,1);
+  will-change: transform;
 }
 .journey-forklift-wheel.wheel-one { top: 8px; }
 .journey-forklift-wheel.wheel-two { bottom: 6px; }
@@ -1240,7 +1249,7 @@ p { line-height: 1.65; }
 .journey-destination {
   position: relative;
   z-index: auto;
-  height: 520svh;
+  height: 490svh;
   color: var(--forest);
   background: var(--paper);
 }
@@ -1336,7 +1345,7 @@ p { line-height: 1.65; }
   .journey-vehicle { width: 104px; }
   .journey-loader,
   .journey-forklift-underlay { width: 112px; height: 74px; }
-  .journey-destination { height: 550svh; }
+  .journey-destination { height: 520svh; }
   .journey-destination-frame { min-height: 100svh; }
   .destination-copy { top: 100px; right: 20px; width: auto; padding-right: 92px; }
   .destination-copy h2 { max-width: 100%; font-size: clamp(34px, 9.8vw, 46px); }
