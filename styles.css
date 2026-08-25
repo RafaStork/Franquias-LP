@@ -1452,7 +1452,28 @@ p { line-height: 1.65; }
   .motion-chapter--factory .hero-actions { max-width: 100%; }
   .manifesto .section-shell,
   .process .section-shell,
-  .faq .section-shell { width: calc(100% - 24px); padding-right: 100px; }
+  .faq .section-shell { width: calc(100% - 24px); padding-right: 82px; }
+  .manifesto .section-shell { padding-right: 100px; }
+  .process-layout,
+  .faq-grid { display: block; }
+  .process-intro,
+  .faq-intro { position: relative; top: auto; }
+  .process-intro h2,
+  .faq-intro h2,
+  .process-list h3,
+  .faq-list summary { overflow-wrap: anywhere; hyphens: auto; }
+  .process-intro > p:not(.eyebrow) { margin: 22px 0 28px; font-size: 14px; line-height: 1.55; }
+  .process-intro .button { width: 100%; max-width: 100%; min-height: 42px; gap: 7px; padding: 0 10px; font-size: clamp(8px, 2.25vw, 10px); letter-spacing: .025em; white-space: nowrap; }
+  .process-list { margin-top: 54px; }
+  .process-list li { grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 30px 0 36px; }
+  .process-list li > span { padding-top: 3px; font-size: 9px; }
+  .process-list h3 { font-size: clamp(20px, 5.8vw, 28px); line-height: 1.06; }
+  .process-list p { margin-top: 12px; font-size: 13px; line-height: 1.5; }
+  .faq-intro > p:last-child { margin-top: 20px; font-size: 13px; line-height: 1.55; }
+  .faq-list { margin-top: 48px; }
+  .faq-list summary { align-items: flex-start; gap: 8px; padding: 21px 0; font-size: clamp(15px, 4.6vw, 19px); line-height: 1.2; }
+  .faq-list summary span { padding-top: 1px; font-size: 20px; line-height: 1; }
+  .faq-list.faq-enhanced .faq-answer p { padding-bottom: 24px; font-size: 13px; line-height: 1.5; }
   .pillars .section-heading.horizontal,
   .pillar-card { padding-right: 106px; }
   .comparison .section-heading.horizontal,
