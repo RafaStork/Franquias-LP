@@ -55,6 +55,9 @@ const destinationRoofDetails = journeyDestination?.querySelector("[data-destinat
 const destinationDeck = journeyDestination?.querySelector("[data-destination-deck]");
 const destinationFinishDetails = journeyDestination?.querySelector("[data-destination-finish-details]");
 const destinationBeats = [...(journeyDestination?.querySelectorAll("[data-destination-beat]") || [])];
+const destinationRoadPaths = [destinationRoadEdge, destinationRoadPath, destinationRoadOrange];
+const destinationRoadDesktopD = "M250-35C250 140 240 290 210 390C193 438 195 470 220 490C232 500 248 503 265 503";
+const destinationRoadMobileD = "M500-35C500 42 458 105 350 150C286 220 246 306 210 390C193 438 195 470 220 490C232 500 248 503 265 503";
 const truckShadowTargets = [...document.querySelectorAll("main h1, main h2, main h3, main p, main summary, main .comparison-row > *, main .profile-mark")]
   .filter((target) => !target.closest(".journey-destination"));
 
@@ -91,6 +94,16 @@ function gridCorridorX(selector, columnIndex = 1, fallbackRatio = .5) {
   return clamp(rect.left + preceding + gap * columnIndex + columns[columnIndex] * .5, 38, journeyViewportWidth() - 38);
 }
 
+function mobileReservedLaneX(selector, fallbackRatio = .91) {
+  const container = document.querySelector(selector);
+  if (!container || journeyViewportWidth() > 720) return journeyX(fallbackRatio);
+  const style = getComputedStyle(container);
+  const reservedWidth = parseFloat(style.getPropertyValue("--journey-mobile-reserve")) || 94;
+  const rect = container.getBoundingClientRect();
+  const laneInset = Math.max(36, reservedWidth * .42);
+  return clamp(rect.right - laneInset, 38, journeyViewportWidth() - 38);
+}
+
 function sectionRouteAnchors(selector, x) {
   const section = document.querySelector(selector);
   if (!section) return [];
@@ -118,8 +131,9 @@ function destinationEntrancePoint(sceneScale = .72) {
   const matrix = destinationVisualSvg.getScreenCTM();
   const point = destinationVisualSvg.createSVGPoint();
   const frameRect = destinationFrame.getBoundingClientRect();
-  point.x = 250;
-  point.y = -35;
+  const roadStart = destinationRoadPath?.getPointAtLength(0);
+  point.x = roadStart?.x ?? 250;
+  point.y = roadStart?.y ?? -35;
   const screenPoint = matrix ? point.matrixTransform(matrix) : null;
   destinationVisual.style.transform = previousTransform;
   if (!screenPoint) return null;
@@ -132,6 +146,8 @@ function destinationEntrancePoint(sceneScale = .72) {
 function buildJourneyRoute() {
   if (!journeyLayer || !journeySvg || !journeyRoute || !heroJourney || !journeyDestination) return;
   const viewportWidth = journeyViewportWidth();
+  const destinationRoadD = viewportWidth <= 720 ? destinationRoadMobileD : destinationRoadDesktopD;
+  destinationRoadPaths.forEach((path) => path?.setAttribute("d", destinationRoadD));
   const pageHeight = document.documentElement.scrollHeight;
   const mobile = viewportWidth <= 720;
   const tablet = viewportWidth > 720 && viewportWidth <= 1000;
@@ -143,6 +159,7 @@ function buildJourneyRoute() {
   journeyEndY = destinationEntrance?.y ?? journeyDestination.offsetTop + window.innerHeight * .56;
 
   const mobileLane = journeyX(.91);
+  const territoryMobileLane = mobileReservedLaneX(".territory-layout", .91);
   const anchors = [{ x: journeyX(mobile ? .91 : .78), y: journeyStartY }];
   const routeSections = [
     ["#oportunidade", mobile ? mobileLane : gridCorridorX(".manifesto-grid", 1, .56)],
@@ -152,7 +169,7 @@ function buildJourneyRoute() {
     ["#processo", mobile ? mobileLane : gridCorridorX(".process-layout", 1, .44)],
     ["#vantagens", mobile ? mobileLane : gridCorridorX(".comparison-row", 2, .58)],
     ["#perfil", mobile ? mobileLane : gridCorridorX(".profile-grid", 1, .43)],
-    ["#territorios", mobile ? mobileLane : gridCorridorX(".territory-layout", 1, .56)],
+    ["#territorios", mobile ? territoryMobileLane : gridCorridorX(".territory-layout", 1, .56)],
     ["#duvidas", mobile ? mobileLane : gridCorridorX(".faq-grid", 1, .42) - clamp(viewportWidth * .025, 28, 48)]
   ];
   routeSections.forEach(([selector, x]) => anchors.push(...sectionRouteAnchors(selector, x)));
@@ -316,7 +333,17 @@ function renderJourney(scrollPosition) {
       distance: 0
     };
   } else if (scrollPosition < journeyDestination.offsetTop) {
-    vehiclePoint = journeyPointAtY(clamp(scrollPosition + window.innerHeight * .56, journeyStartY, journeyEndY));
+    const destinationViewportY = journeyEndY - journeyDestination.offsetTop;
+    const approachViewportY = lerp(
+      window.innerHeight * .56,
+      destinationViewportY,
+      smooth(
+        journeyDestination.offsetTop - window.innerHeight * 1.15,
+        journeyDestination.offsetTop,
+        scrollPosition
+      )
+    );
+    vehiclePoint = journeyPointAtY(clamp(scrollPosition + approachViewportY, journeyStartY, journeyEndY));
     vehiclePoint.y -= scrollPosition;
   } else {
     let stageX = journeyX(.55);
@@ -343,6 +370,12 @@ function renderJourney(scrollPosition) {
       stageAngle = Math.atan2(nextScreen.y - previousScreen.y, nextScreen.x - previousScreen.x) * 180 / Math.PI;
       vehicleScale = lerp(1, (250 * svgScale) / Math.max(1, journeyVehicle.offsetWidth), arrivalProgress);
     }
+    const routeHandoff = journeyPointAtY(journeyEndY);
+    const handoffProgress = smooth(0, .075, destinationRawProgress);
+    stageX = lerp(routeHandoff.x, stageX, handoffProgress);
+    stageY = lerp(journeyEndY - journeyDestination.offsetTop, stageY, handoffProgress);
+    stageAngle = lerpAngle(routeHandoff.angle, stageAngle, handoffProgress);
+    vehicleScale = lerp(1, vehicleScale, handoffProgress);
     vehiclePoint = {
       x: stageX,
       y: stageY,
