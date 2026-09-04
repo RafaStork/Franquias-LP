@@ -1,0 +1,13 @@
+# Copas ilustradas — revisão 103
+
+Geradas pela ferramenta integrada de imagens em uma chamada, sem CLI e sem novas tentativas. Quatro WebPs transparentes de 192 × 192: `tree-illustrated-1.webp`, `tree-illustrated-2.webp`, `tree-illustrated-3.webp`, `tree-illustrated-4.webp`, nesta pasta. Margens transparentes excedentes recortadas para que a copa preencha melhor o espaço. Arquivos anteriores preservados, sem uso na LP atual.
+
+## Prompt final
+
+Use case: stylized-concept
+Asset type: one transparent tree sprite atlas for a crisp illustrated 2D top-down game-map website featuring an orange truck.
+Primary request: Exactly FOUR instantly recognizable tree crowns viewed from directly overhead, straight-down orthographic plan view. A middle ground between abstract blobs and realistic leaves: hand-drawn landscape-plan vector illustration rendered as a raster asset. Each tree has about 8–12 irregular overlapping foliage clusters with lightly scalloped edges, plus a few clearly visible small brown branching Y-shaped limbs in the canopy gaps. These branching structures must make the shapes unmistakably trees even at 70 pixels wide.
+Subjects: top left an umbrella pine with branches radiating outward into separated irregular foliage pads; top right an asymmetrical round broadleaf crown; bottom left a different broadleaf crown with an uneven organic rounded silhouette; bottom right a cedar crown with SHORT layered foliage branch-spokes, dense irregular tiers, never a geometric star.
+Style: clean hand-drawn vector-style outlines and flat cel shading in exactly three greens: main foliage #4f7747, highlight patches #83a878, dark shadow #1f331b. Use tiny amounts of #8c623e for visible branching limbs. No gradients, no leaf texture, no tiny individual leaves. Canopy lobes need enough botanical branch organization to read as trees, rather than cloud blobs or clovers.
+Composition: square approximately 1024 x 1024 PNG, genuine transparent alpha background. Exactly four separate sprites on an equal 2x2 grid with their centers precisely at 25%/25%, 75%/25%, 25%/75%, and 75%/75%. Each tree occupies about 34–38% of canvas width and fits entirely inside its quadrant with ample transparent margin. All four crowns of similar visual scale. No overlap. No grid lines, text, labels, frame, ground, detached leaves, additional objects, or cast shadows on the background.
+Avoid: photorealism, photographic textures, hundreds of tiny leaves, gradients, flowers, clovers, simple cloud blobs, three-lobed emblems, perfect circles, geometric starbursts, long needle spikes, isometric perspective, side-view trunks. True vertical overhead view only; actual transparent alpha, not a drawn checkerboard.

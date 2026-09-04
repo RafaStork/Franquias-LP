@@ -17,6 +17,7 @@ const journeySvg = journeyLayer?.querySelector("[data-journey-svg]");
 const journeyRoute = journeyLayer?.querySelector("[data-journey-route]");
 const journeyRouteDash = journeyLayer?.querySelector("[data-journey-route-dash]");
 const journeyRouteProgress = journeyLayer?.querySelector("[data-journey-route-progress]");
+const journeyForest = journeyLayer?.querySelector("[data-journey-forest]");
 const journeyVehicle = journeyLayer?.querySelector("[data-journey-vehicle]");
 const journeyVehicleCargo = journeyLayer?.querySelector("[data-journey-vehicle-cargo]");
 const journeyVehicleGraphic = journeyVehicle?.querySelector("svg");
@@ -108,8 +109,8 @@ function sectionRouteAnchors(selector, x) {
   const section = document.querySelector(selector);
   if (!section) return [];
   const inset = Math.min(section.offsetHeight * .28, Math.max(130, window.innerHeight * .3));
-  const protectedEntries = new Set(["#vantagens", "#perfil", "#territorios", "#duvidas"]);
-  const transitionExits = new Set(["#processo", "#vantagens", "#perfil", "#territorios"]);
+  const protectedEntries = new Set(["#oportunidade", "#vantagens", "#perfil", "#territorios", "#duvidas"]);
+  const transitionExits = new Set(["#oportunidade", "#processo", "#vantagens", "#perfil", "#territorios"]);
   const protectsVisualEntry = protectedEntries.has(selector);
   const entryInset = protectsVisualEntry
     ? Math.min(inset, Math.max(80, window.innerHeight * .12))
@@ -118,10 +119,77 @@ function sectionRouteAnchors(selector, x) {
   const exitInset = transitionExits.has(selector) && journeyViewportWidth() > 720
     ? Math.max(inset, bottomPadding - 72)
     : inset;
+  const curveGuard = journeyViewportWidth() <= 720 ? 64 : 112;
+  const topPadding = parseFloat(getComputedStyle(section).paddingTop) || inset;
   return [
-    { x, y: section.offsetTop + entryInset, routeSection: selector, routeBoundary: "entry" },
-    { x, y: section.offsetTop + section.offsetHeight - exitInset, routeSection: selector, routeBoundary: "exit" }
+    { x, y: section.offsetTop + (selector === "#modelo" ? Math.max(entryInset,topPadding-curveGuard) : entryInset), routeSection: selector, routeBoundary: "entry" },
+    { x, y: section.offsetTop + section.offsetHeight - (selector === "#empresa" ? Math.max(exitInset,bottomPadding-curveGuard) : exitInset), routeSection: selector, routeBoundary: "exit" }
   ];
+}
+
+// Project the photographed buildings through the original CSS cover crop.
+// Source coordinates include roof, deck and supports, but not water reflections.
+function opportunityPhotoObstacles(box, sourceWidth = 1600, sourceHeight = 1067) {
+  const scale = Math.max(box.width / sourceWidth, box.height / sourceHeight);
+  const imageWidth = sourceWidth * scale, imageHeight = sourceHeight * scale;
+  const imageLeft = box.left + (box.width - imageWidth) * .57;
+  const imageTop = box.top + (box.height - imageHeight) * .56;
+  return [[.447, .382, .722, .753], [.802, .464, 1, .754]].map(([l,t,r,b]) => ({
+    left: Math.max(box.left, imageLeft + l * imageWidth),
+    right: Math.min(box.left + box.width, imageLeft + r * imageWidth),
+    top: Math.max(box.top, imageTop + t * imageHeight),
+    bottom: Math.min(box.top + box.height, imageTop + b * imageHeight)
+  })).filter(rect => rect.right > rect.left && rect.bottom > rect.top);
+}
+
+function opportunityLane(width, building, truckWidth, titleRight, copyLeft, preferredX) {
+  const limit = (n,a,b) => Math.max(a,Math.min(b,n));
+  const edge = Math.hypot(truckWidth,truckWidth*140/270)/2+12;
+  const lateral = truckWidth*140/270/2+18;
+  const low = Math.max(edge,titleRight+lateral);
+  const high = Math.min(width-edge,copyLeft-lateral);
+  // The marked line is just left of the chalet/deck, not the old grid center.
+  // Mobile retains its reserved right-side lane; no off-screen alternatives.
+  const target = width>720 && building ? building.left-lateral : preferredX;
+  return low<=high ? limit(target,low,high) : limit(preferredX,edge,width-edge);
+}
+
+function opportunityRouteAnchors(preferredX) {
+  const section = document.querySelector("#oportunidade");
+  const photo = section?.querySelector(".manifesto-backdrop img");
+  if (!section || !photo) return sectionRouteAnchors("#oportunidade",preferredX);
+  const layoutRect = element => {
+    let left=0,top=0,current=element;
+    while(current) { left+=current.offsetLeft; top+=current.offsetTop; current=current.offsetParent; }
+    return {left,top,width:element.offsetWidth,height:element.offsetHeight,
+      right:left+element.offsetWidth,bottom:top+element.offsetHeight};
+  };
+  const box=layoutRect(section);
+  const building=opportunityPhotoObstacles(box,photo.naturalWidth||1600,photo.naturalHeight||1067)[0];
+  const title=layoutRect(section.querySelector(".manifesto-grid > :first-child"));
+  const copy=layoutRect(section.querySelector(".manifesto-copy"));
+  const truckWidth=journeyVehicle.offsetWidth||(box.width<=720?72:154);
+  const x=opportunityLane(box.width,building,truckWidth,
+    box.width<=720?copy.right:title.right,box.width<=720?box.width:copy.left,preferredX);
+  // A straight passage throughout the photo. Turns occur in the adjacent bands.
+  return [
+    {x,y:box.top+40,routeSection:"#oportunidade",routeBoundary:"entry"},
+    {x,y:box.bottom-40,routeSection:"#oportunidade",routeBoundary:"exit"}
+  ];
+}
+
+function factoryLoadingPhase(progress) {
+  return Math.max(0,Math.min(1,(progress-.08)/.78));
+}
+
+function factoryPanelPair(pose, unitScale) {
+  const radians = pose.angle * Math.PI / 180;
+  const halfGap = 17.5 * unitScale * pose.zoom;
+  // Both panels belong to one rigid load, sharing the fork's rotation/lift.
+  return [-1,1].map(side => ({...pose,
+    x:pose.x-Math.sin(radians)*halfGap*side,
+    y:pose.y+Math.cos(radians)*halfGap*side
+  }));
 }
 
 function destinationEntrancePoint(sceneScale = .72) {
@@ -146,9 +214,25 @@ function destinationEntrancePoint(sceneScale = .72) {
 function buildJourneyRoute() {
   if (!journeyLayer || !journeySvg || !journeyRoute || !heroJourney || !journeyDestination) return;
   const viewportWidth = journeyViewportWidth();
+  const opportunity = document.querySelector("#oportunidade");
+  const opportunityTitle = opportunity?.querySelector(".manifesto-grid > :first-child");
+  if (opportunity && opportunityTitle && viewportWidth <= 720) {
+    // Layout offsets ignore the entrance animation and do not change the section height.
+    const layoutTop = element => {
+      let top = 0;
+      for (let current = element; current; current = current.offsetParent) top += current.offsetTop;
+      return top;
+    };
+    opportunity.style.setProperty("--opportunity-photo-top", `${layoutTop(opportunityTitle) + opportunityTitle.offsetHeight - layoutTop(opportunity)}px`);
+  }
   const destinationRoadD = viewportWidth <= 720 ? destinationRoadMobileD : destinationRoadDesktopD;
   destinationRoadPaths.forEach((path) => path?.setAttribute("d", destinationRoadD));
-  const pageHeight = document.documentElement.scrollHeight;
+  // Measure the real page end, not the absolute route layer's previous height.
+  // Otherwise closing an accordion can leave a stale blank area below the footer.
+  const pageEnd = document.querySelector(".footer-credit-bar") || document.querySelector("main");
+  const pageHeight = pageEnd
+    ? Math.ceil(pageEnd.getBoundingClientRect().bottom + window.scrollY + (parseFloat(getComputedStyle(pageEnd).marginBottom) || 0))
+    : document.documentElement.scrollHeight;
   const mobile = viewportWidth <= 720;
   const tablet = viewportWidth > 720 && viewportWidth <= 1000;
   journeyLayer.style.height = `${pageHeight}px`;
@@ -162,6 +246,7 @@ function buildJourneyRoute() {
   const territoryMobileLane = mobileReservedLaneX(".territory-layout", .91);
   const anchors = [{ x: journeyX(mobile ? .91 : .78), y: journeyStartY }];
   const routeSections = [
+    ["#empresa", mobile ? mobileLane : gridCorridorX(".company-grid", 1, .5)],
     ["#oportunidade", mobile ? mobileLane : gridCorridorX(".manifesto-grid", 1, .56)],
     ["#modelo", mobile ? mobileLane : gridCorridorX(".pillar-grid", 1, .5)],
     ["#chales", mobile ? mobileLane : gridCorridorX(".chalet-gallery", 1, .5)],
@@ -172,7 +257,8 @@ function buildJourneyRoute() {
     ["#territorios", mobile ? territoryMobileLane : gridCorridorX(".territory-layout", 1, .56)],
     ["#duvidas", mobile ? mobileLane : gridCorridorX(".faq-grid", 1, .42) - clamp(viewportWidth * .025, 28, 48)]
   ];
-  routeSections.forEach(([selector, x]) => anchors.push(...sectionRouteAnchors(selector, x)));
+  routeSections.forEach(([selector, x]) => anchors.push(...(selector === "#oportunidade"
+    ? opportunityRouteAnchors(x) : sectionRouteAnchors(selector, x))));
   anchors.push({ x: destinationEntrance?.x ?? journeyX(mobile ? .55 : tablet ? .5 : .55), y: journeyEndY });
 
   let routeData = `M ${anchors[0].x} ${anchors[0].y}`;
@@ -205,6 +291,148 @@ function buildJourneyRoute() {
     journeyRouteProgress.style.strokeDasharray = String(journeyRouteLength);
     journeyRouteProgress.style.strokeDashoffset = String(journeyRouteLength);
   }
+  scheduleJourneyForest(anchors);
+}
+
+let forestBuildJob = 0;
+function scheduleJourneyForest(anchors) {
+  if (forestBuildJob) {
+    if (window.cancelIdleCallback) window.cancelIdleCallback(forestBuildJob);
+    else clearTimeout(forestBuildJob);
+  }
+  const build = () => { forestBuildJob = 0; buildJourneyForest(anchors); };
+  // The truck and content render first; decoration must not block initial paint.
+  forestBuildJob = window.requestIdleCallback
+    ? window.requestIdleCallback(build, { timeout: 800 }) : setTimeout(build, 80);
+}
+
+// Approved option 09: dense understory beneath broad, visibly branched crowns.
+function forestTreeFits(tree, viewportWidth, protectedRects, roadPoints, trees, roadClearance) {
+  const margin = tree.radius + 10;
+  if (tree.bleed) {
+    if (tree.x + tree.radius < 0 || tree.x - tree.radius > viewportWidth) return false;
+  } else if (tree.x < margin || tree.x > viewportWidth - margin) return false;
+  if (protectedRects.some(rect => tree.x + margin > rect.left && tree.x - margin < rect.right
+    && tree.y + margin > rect.top && tree.y - margin < rect.bottom)) return false;
+  // Test the complete polyline, including gaps between samples on steep bends.
+  const roadRadiusSquared = (tree.radius + roadClearance + 2) ** 2;
+  for (let index = 0; index < roadPoints.length; index += 1) {
+    const a = roadPoints[index], b = roadPoints[index + 1] || a;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const lengthSquared = dx * dx + dy * dy;
+    const t = lengthSquared ? Math.max(0, Math.min(1, ((tree.x-a.x)*dx + (tree.y-a.y)*dy) / lengthSquared)) : 0;
+    if ((tree.x-a.x-dx*t)**2 + (tree.y-a.y-dy*t)**2 < roadRadiusSquared) return false;
+  }
+  const spacing = tree.layer === 1 ? .72 : .52;
+  return !trees.some(other => Math.hypot(tree.x - other.x, tree.y - other.y) < (tree.radius + other.radius) * spacing);
+}
+
+// Evaluate the same four cubic segments as buildJourneyRoute, without thousands
+// of native getPointAtLength calls against a path spanning the entire page.
+function forestRoadPoint(anchors, y) {
+  if (y <= anchors[0].y) return { x: anchors[0].x, y };
+  const end = anchors.findIndex(point => point.y >= y);
+  if (end < 1) return { x: anchors[anchors.length - 1].x, y };
+  const a = anchors[end - 1], b = anchors[end];
+  const t = clamp((y - a.y) / Math.max(1, b.y - a.y), 0, 1);
+  const segment = Math.min(3, Math.floor(t * 4));
+  const u = t * 4 - segment, start = segment / 4, finish = (segment + 1) / 4;
+  const ease = n => n ** 3 * (n * (n * 6 - 15) + 10);
+  const slope = n => 30 * n ** 2 * (n - 1) ** 2;
+  const p0 = ease(start), p1 = p0 + slope(start) / 12;
+  const p3 = ease(finish), p2 = p3 - slope(finish) / 12;
+  const blend = (1-u)**3*p0 + 3*(1-u)**2*u*p1 + 3*(1-u)*u*u*p2 + u**3*p3;
+  return { x: lerp(a.x, b.x, blend), y };
+}
+
+let forestLayoutKey = "";
+function buildJourneyForest(anchors) {
+  if (!journeyForest || !journeyRoute) return;
+  const width = journeyViewportWidth();
+  const mobile = width <= 720;
+  // Protect testimonial information, but leave the card's decorative edges open to foliage.
+  const protectedRects = [...document.querySelectorAll("main h1, main h2, main h3, main p, main a, main figure, main li, .company-years, .company-photos, .pillar-card, .comparison-table, .profile-visual, .brazil-map-stage, .territory-city-list, .faq-intro, .lead-form, .testimonial-card blockquote, .testimonial-card footer, .testimonial-tag")]
+    .filter(element => !element.closest(".journey-destination"))
+    .map(element => {
+      // Offset geometry is unaffected by reveal transforms and sticky scrolling.
+      let left = 0, top = 0, current = element;
+      while (current) { left += current.offsetLeft; top += current.offsetTop; current = current.offsetParent; }
+      return { left, top, right: left + element.offsetWidth, bottom: top + element.offsetHeight };
+    });
+  const layoutKey = JSON.stringify([width, anchors, protectedRects]);
+  if (layoutKey === forestLayoutKey) return;
+  forestLayoutKey = layoutKey;
+  const fragment = document.createDocumentFragment();
+  for (let index = 1; index < anchors.length; index += 1) {
+    const start = anchors[index - 1], end = anchors[index];
+    if (start.routeBoundary !== "exit" || end.routeBoundary !== "entry") continue;
+    const padding = mobile ? 90 : 150;
+    const nearbyRects = protectedRects.filter(rect => rect.bottom >= start.y - padding && rect.top <= end.y + padding);
+    const treesByLayer = [[], []];
+    const roadPoints = [];
+    for (let y = start.y - padding; y <= end.y + padding; y += 14) roadPoints.push(forestRoadPoint(anchors, y));
+    const columns = Math.max(3, Math.ceil(width / (mobile ? 42 : 84)));
+    const cellWidth = width / columns;
+    const transitionTrees = [];
+    for (let layer = 0; layer < 2; layer += 1) {
+      const spacingY = layer === 0 ? (mobile ? 40 : 70) : (mobile ? 100 : 160);
+      const steps = clamp(Math.ceil((end.y - start.y) / spacingY), layer === 0 ? 6 : 3, 22);
+      for (let step = 1; step <= steps; step += 1) {
+        const bandY = lerp(start.y, end.y, step / (steps + 1));
+        // Fill the full free band. Stagger and jitter avoid straight plantation rows.
+        for (let column = -1; column <= columns; column += 1) {
+          const seed = index * 131 + step * 37 + column * 19 + layer * 157;
+          const variation = (Math.sin(seed * 12.9898) * 43758.5453) % 1;
+          const radius = layer === 0
+            ? (mobile ? 27 + Math.abs(variation) * 9 : 48 + Math.abs(variation) * 18)
+            : (mobile ? 38 + Math.abs(variation) * 12 : 70 + Math.abs(variation) * 24);
+          const tree = { x: (column + .5 + (step % 2) * .3) * cellWidth + variation * cellWidth * .24,
+            y: bandY + variation * (mobile ? 19 : 38), radius, layer, bleed: true,
+            variant: layer === 1 ? [1, 2, 5, 6][Math.abs(seed) % 4] : 3 + Math.abs(seed) % 2,
+            rotation: layer === 1 ? 0 : seed % 360 };
+          if (!forestTreeFits(tree, width, nearbyRects, roadPoints, treesByLayer[layer], mobile ? 27 : 58)) continue;
+          treesByLayer[layer].push(tree);
+          transitionTrees.push(tree);
+        }
+      }
+    }
+    // Selective rear canopies retain small interior clearings.
+    const shadowTrees = [];
+    const shadowCell = mobile ? 40 : 72;
+    const shadowColumns = Math.ceil(width / shadowCell);
+    const shadowRows = Math.max(1, Math.ceil((end.y - start.y) / shadowCell));
+    for (let row = 0; row < shadowRows; row += 1) {
+      for (let column = -1; column <= shadowColumns; column += 1) {
+        const seed = index * 173 + row * 31 + column * 47;
+        const jitter = Math.sin(seed * 7.19);
+        const tree = {
+          x: (column + .5 + (row % 2) * .35) * shadowCell + jitter * shadowCell * .12,
+          y: lerp(start.y, end.y, (row + .5) / shadowRows) + jitter * shadowCell * .12,
+          radius: mobile ? 38 + Math.abs(jitter) * 6 : 66 + Math.abs(jitter) * 12,
+          layer: -1, bleed: true, variant: 7 + Math.abs(seed) % 2, rotation: seed % 360
+        };
+        if (transitionTrees.some(other => Math.hypot(tree.x - other.x, tree.y - other.y) < other.radius * .65)) continue;
+        if (!forestTreeFits(tree, width, nearbyRects, roadPoints, shadowTrees, mobile ? 27 : 58)) continue;
+        shadowTrees.push(tree);
+      }
+    }
+    // The same irregular grove continues beyond the viewport. No separate
+    // edge rows: clipping simply crops the ordinary crowns at the screen edge.
+    transitionTrees.push(...shadowTrees);
+    // Rear shade, middle foliage, then upright branched crowns.
+    transitionTrees.sort((a, b) => a.layer - b.layer || a.y - b.y).forEach(tree => {
+      const sprite = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      sprite.setAttribute("href", `#forest-09-${tree.variant}`);
+      sprite.setAttribute("data-canopy-layer", String(tree.layer));
+      sprite.setAttribute("x", String(-tree.radius));
+      sprite.setAttribute("y", String(-tree.radius));
+      sprite.setAttribute("width", String(tree.radius * 2));
+      sprite.setAttribute("height", String(tree.radius * 2));
+      sprite.setAttribute("transform", `translate(${tree.x.toFixed(2)} ${tree.y.toFixed(2)}) rotate(${tree.rotation})`);
+      fragment.append(sprite);
+    });
+  }
+  journeyForest.replaceChildren(fragment);
 }
 
 function journeyPointAtY(documentY) {
@@ -279,11 +507,7 @@ function renderJourney(scrollPosition) {
       : 1;
   const journeyEndScroll = journeyDestination.offsetTop + journeyDestination.offsetHeight;
   const loadingProgress = clamp(scrollPosition / Math.max(1, journeyStartScroll));
-  const loadingMotionProgress = loadingProgress <= .37
-    ? lerp(0, .42, loadingProgress / .37)
-    : loadingProgress <= .9
-      ? lerp(.42, .9, (loadingProgress - .37) / .53)
-      : loadingProgress;
+  const loadingMotionProgress = loadingProgress;
   const departureProgress = clamp((loadingProgress - .9) / .1);
   const departureAcceleration = departureProgress * departureProgress * (2 - departureProgress);
   const roadAccelerationProgress = clamp((scrollPosition - journeyStartScroll) / Math.max(1, window.innerHeight * 1.35));
@@ -413,8 +637,7 @@ function renderJourney(scrollPosition) {
   journeyLayer.classList.toggle("is-driving", scrollPosition > journeyStartScroll && scrollPosition < journeyDestination.offsetTop);
   journeyLayer.classList.toggle("is-arriving", scrollPosition >= journeyDestination.offsetTop);
 
-  const cargoOneLoad = clamp((loadingMotionProgress - .02) / .4);
-  const cargoTwoLoad = clamp((loadingMotionProgress - .58) / .32);
+  const cargoOneLoad = factoryLoadingPhase(loadingMotionProgress);
   const forkliftCycle = (progress) => {
     const approach = smooth(0, .2, progress);
     const contact = smooth(.2, .28, progress);
@@ -436,7 +659,7 @@ function renderJourney(scrollPosition) {
     };
   };
   const cargoOneCycle = forkliftCycle(cargoOneLoad);
-  const cargoTwoCycle = forkliftCycle(cargoTwoLoad);
+  const cargoTwoCycle = cargoOneCycle;
   const cargoOneLift = cargoOneCycle.lift;
   const cargoTwoLift = cargoTwoCycle.lift;
   const cargoOneSceneFade = 1 - smooth(.435, .455, destinationProgress);
@@ -444,10 +667,9 @@ function renderJourney(scrollPosition) {
   if (journeyLoader) {
     const loaderFade = mobileSceneReveal * (1 - smooth(.895, .915, loadingMotionProgress));
     const cargoScreenAngle = journeyVisualAngle;
-    const cargoSwitch = smooth(.42, .58, loadingMotionProgress);
-    const activeLift = lerp(cargoOneLift, cargoTwoLift, cargoSwitch);
-    const activeEngage = lerp(cargoOneCycle.engage, cargoTwoCycle.engage, cargoSwitch);
-    const activeTravel = lerp(cargoOneCycle.travel, cargoTwoCycle.travel, cargoSwitch);
+    const activeLift = cargoOneLift;
+    const activeEngage = cargoOneCycle.engage;
+    const activeTravel = cargoOneCycle.travel;
     const viewportWidth = journeyViewportWidth();
     const mobileForklift = viewportWidth <= 720;
     const forkliftBaseScale = mobileForklift ? .52 * mobileCameraZoom : viewportWidth <= 1000 ? .78 : 1;
@@ -474,27 +696,6 @@ function renderJourney(scrollPosition) {
       x: clamp(point.x, clearBounds.left + padding, clearBounds.right - padding),
       y: clamp(point.y, clearBounds.top + padding, clearBounds.bottom - padding)
     });
-    const tangentControlPoint = (origin, heading, desiredLength, padding = 0) => {
-      const radians = heading * Math.PI / 180;
-      const directionX = Math.cos(radians);
-      const directionY = Math.sin(radians);
-      const left = clearBounds.left + padding;
-      const right = clearBounds.right - padding;
-      const top = clearBounds.top + padding;
-      const bottom = clearBounds.bottom - padding;
-      const limits = [];
-      if (directionX > .001) limits.push((right - origin.x) / directionX);
-      else if (directionX < -.001) limits.push((left - origin.x) / directionX);
-      if (directionY > .001) limits.push((bottom - origin.y) / directionY);
-      else if (directionY < -.001) limits.push((top - origin.y) / directionY);
-      const availableLength = Math.min(...limits.filter((limit) => Number.isFinite(limit) && limit >= 0), desiredLength);
-      const minimumLength = 18 * motionScale;
-      const controlLength = Math.min(desiredLength, Math.max(minimumLength, availableLength * .88));
-      return {
-        x: origin.x + directionX * controlLength,
-        y: origin.y + directionY * controlLength
-      };
-    };
     const cubicPose = (start, controlOne, controlTwo, end, progress) => {
       const inverse = 1 - progress;
       const x = inverse ** 3 * start.x + 3 * inverse ** 2 * progress * controlOne.x + 3 * inverse * progress ** 2 * controlTwo.x + progress ** 3 * end.x;
@@ -503,39 +704,10 @@ function renderJourney(scrollPosition) {
       const tangentY = 3 * inverse ** 2 * (controlOne.y - start.y) + 6 * inverse * progress * (controlTwo.y - controlOne.y) + 3 * progress ** 2 * (end.y - controlTwo.y);
       return { x, y, heading: Math.atan2(tangentY, tangentX) * 180 / Math.PI };
     };
-    const cubicPoseByMotion = (start, controlOne, controlTwo, end, progress) => {
-      const sampleCount = 30;
-      const poses = [cubicPose(start, controlOne, controlTwo, end, 0)];
-      const costs = [0];
-      let totalCost = 0;
-      for (let sample = 1; sample <= sampleCount; sample += 1) {
-        const pose = cubicPose(start, controlOne, controlTwo, end, sample / sampleCount);
-        const previousPose = poses[sample - 1];
-        const distance = Math.hypot(pose.x - previousPose.x, pose.y - previousPose.y);
-        const headingDelta = Math.abs(((((pose.heading - previousPose.heading) % 360) + 540) % 360) - 180);
-        totalCost += distance + headingDelta * 1.45 * motionScale;
-        poses.push(pose);
-        costs.push(totalCost);
-      }
-      const targetCost = totalCost * clamp(progress);
-      let sample = 1;
-      while (sample < costs.length - 1 && costs[sample] < targetCost) sample += 1;
-      const segmentCost = Math.max(.0001, costs[sample] - costs[sample - 1]);
-      const localProgress = (targetCost - costs[sample - 1]) / segmentCost;
-      const curveProgress = lerp((sample - 1) / sampleCount, sample / sampleCount, localProgress);
-      return cubicPose(start, controlOne, controlTwo, end, curveProgress);
-    };
     const supportReach = (lift) => (70 + lift * 10.4) * forkliftBaseScale;
     const sourceOneRaw = vehicleLocalToScreen(6, 177);
-    const sourceTwoRaw = vehicleLocalToScreen(321, 232);
-    const sourceOne = clampToAisle(sourceOneRaw, 34 * forkliftBaseScale);
-    let sourceTwo = clampToAisle(sourceTwoRaw, 34 * forkliftBaseScale);
-    const minimumPanelGap = 88 * forkliftBaseScale;
-    if (Math.hypot(sourceTwo.x - sourceOne.x, sourceTwo.y - sourceOne.y) < minimumPanelGap) {
-      sourceTwo = clampToAisle({ x: sourceTwo.x, y: sourceOne.y + minimumPanelGap }, 34 * forkliftBaseScale);
-    }
-    const finalOne = vehicleLocalToScreen(106, 52);
-    const finalTwo = vehicleLocalToScreen(106, 87);
+    const sourceOne = clampToAisle(sourceOneRaw, 46 * forkliftBaseScale);
+    const finalPair = vehicleLocalToScreen(106, 69.5);
     const makePanelSpec = (source, target, initialRotation, index) => {
       const sourceAngle = cargoScreenAngle + initialRotation;
       const targetAngle = cargoScreenAngle;
@@ -587,8 +759,7 @@ function renderJourney(scrollPosition) {
         }
       };
     };
-    const panelOneSpec = makePanelSpec(sourceOne, finalOne, -7, 0);
-    const panelTwoSpec = makePanelSpec(sourceTwo, finalTwo, 7, 1);
+    const panelOneSpec = makePanelSpec(sourceOne, finalPair, -7, 0);
     const carriedPanelPose = (cycle, spec) => {
       if (cycle.phase < .4) return { ...spec.source, heading: spec.sourceHeading };
       if (cycle.phase < .78) return cubicPose(
@@ -626,29 +797,7 @@ function renderJourney(scrollPosition) {
       };
     };
     const forkliftPlanAt = (timelineProgress) => {
-      const oneLoad = clamp((timelineProgress - .02) / .4);
-      const twoLoad = clamp((timelineProgress - .58) / .32);
-      const oneCycle = forkliftCycle(oneLoad);
-      const twoCycle = forkliftCycle(twoLoad);
-      const onePose = cyclePose(oneCycle, panelOneSpec);
-      const twoPose = cyclePose(twoCycle, panelTwoSpec, 42);
-      if (timelineProgress < .42) return onePose;
-      if (timelineProgress >= .58) return twoPose;
-      const transfer = clamp((timelineProgress - .42) / .16);
-      const transferStart = { x: onePose.frontX, y: onePose.frontY };
-      const transferEnd = panelTwoSpec.approachStart;
-      const transferDistance = Math.hypot(transferEnd.x - transferStart.x, transferEnd.y - transferStart.y);
-      const transferHandle = clamp(transferDistance * .4, 64 * motionScale, 124 * motionScale);
-      const transferControlOne = tangentControlPoint(transferStart, onePose.heading, transferHandle, 44 * forkliftBaseScale);
-      const transferControlTwo = tangentControlPoint(transferEnd, panelTwoSpec.sourceHeading + 180, transferHandle, 44 * forkliftBaseScale);
-      const transferPose = cubicPoseByMotion(
-        transferStart,
-        transferControlOne,
-        transferControlTwo,
-        transferEnd,
-        smooth(0, 1, transfer)
-      );
-      return { frontX: transferPose.x, frontY: transferPose.y, heading: transferPose.heading, gear: 1 };
+      return cyclePose(forkliftCycle(factoryLoadingPhase(timelineProgress)),panelOneSpec);
     };
     const plan = forkliftPlanAt(loadingMotionProgress);
     let cameraShiftX = 0;
@@ -685,8 +834,9 @@ function renderJourney(scrollPosition) {
       element.style.opacity = String((centerY === 52 ? cargoOneSceneFade : cargoTwoSceneFade) * vehicleFade);
       element.style.transform = `translate3d(${pose.x + cameraShiftX}px, ${pose.y + cameraShiftY}px, 0) translate(-50%, -50%) rotate(${pose.angle}deg) scale(${pose.zoom})`;
     };
-    applyRigidPanelPose(journeyCargoOne, 52, panelPoseFor(cargoOneCycle, panelOneSpec));
-    applyRigidPanelPose(journeyCargoTwo, 87, panelPoseFor(cargoTwoCycle, panelTwoSpec));
+    const pair = factoryPanelPair(panelPoseFor(cargoOneCycle,panelOneSpec),vehicleUnitScale);
+    applyRigidPanelPose(journeyCargoOne,52,pair[0]);
+    applyRigidPanelPose(journeyCargoTwo,87,pair[1]);
     if (journeyCargoOne) journeyCargoOne.style.filter = `drop-shadow(0 ${lerp(3, 16, cargoOneLift)}px ${lerp(2, 9, cargoOneLift)}px rgba(5,16,7,${lerp(.18, .34, cargoOneLift)}))`;
     if (journeyCargoTwo) journeyCargoTwo.style.filter = `drop-shadow(0 ${lerp(3, 16, cargoTwoLift)}px ${lerp(2, 9, cargoTwoLift)}px rgba(5,16,7,${lerp(.18, .34, cargoTwoLift)}))`;
     const nearStep = .012;
@@ -713,11 +863,7 @@ function renderJourney(scrollPosition) {
     const rearBottomSteer = clamp(rearSteerSign * (curvature > 0 ? innerSteer : outerSteer), -34, 34);
     const wheelRoll = -cargoOneCycle.approach * 55
       - cargoOneCycle.travel * 95
-      + cargoOneCycle.release * 36
-      + cargoSwitch * 70
-      - cargoTwoCycle.approach * 55
-      - cargoTwoCycle.travel * 95
-      + cargoTwoCycle.release * 32;
+      + cargoOneCycle.release * 36;
     const bodyBob = Math.sin(wheelRoll * .18) * .8;
     const forkliftTransform = `translate3d(${plan.frontX + cameraShiftX}px, ${plan.frontY + cameraShiftY}px, 0) rotate(${steering}deg) scale(${forkliftBaseScale}) translate(-69px, -37px)`;
     journeyLoader.style.opacity = String(loaderFade);
@@ -948,6 +1094,15 @@ if (journeyLayer && journeyRoute && journeyVehicle && heroJourney && journeyDest
   window.addEventListener("resize", resizeJourney, { passive: true });
   motionPreference.addEventListener?.("change", rebuildJourney);
   document.fonts?.ready.then(rebuildJourney);
+  document.querySelector(".manifesto-backdrop img")?.addEventListener("load", rebuildJourney);
+  if ("ResizeObserver" in window) {
+    let layoutFrame = 0;
+    const layoutObserver = new ResizeObserver(() => {
+      if (layoutFrame) cancelAnimationFrame(layoutFrame);
+      layoutFrame = requestAnimationFrame(() => { layoutFrame = 0; rebuildJourney(); });
+    });
+    document.querySelectorAll("main > section, .motion-chapter--factory").forEach(section => layoutObserver.observe(section));
+  }
 }
 
 const siteHeader = document.querySelector("[data-header]");
@@ -959,7 +1114,7 @@ const year = document.querySelector("#year");
 if (year) year.textContent = new Date().getFullYear();
 
 if ("IntersectionObserver" in window && !motionPreference.matches) {
-  const revealTargets = [...document.querySelectorAll(".manifesto-grid > :not(.motion-slot), .section-heading, .pillar-card, .chalet-showcase-heading > *, .chalet-photo, .testimonials-heading > *, .testimonial-card, .process-list li, .comparison-table, .profile-grid > :not(.motion-slot), .territory-layout > :not(.motion-slot), .faq-list details, .lead-section > :not(.motion-slot)")];
+  const revealTargets = [...document.querySelectorAll(".company-copy, .company-photos figure, .manifesto-grid > :not(.motion-slot), .section-heading, .pillar-card, .chalet-showcase-heading > *, .chalet-photo, .testimonials-heading > *, .testimonial-card, .process-list li, .comparison-table, .profile-grid > :not(.motion-slot), .territory-layout > :not(.motion-slot), .faq-list details, .lead-section > :not(.motion-slot)")];
   revealTargets.forEach((target, index) => {
     target.setAttribute("data-reveal", "");
     target.style.setProperty("--reveal-delay", `${(index % 3) * 70}ms`);

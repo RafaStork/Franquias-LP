@@ -11,8 +11,8 @@
     <meta property="og:image" content="./assets/og.png" />
     <title>Franquias 321 Modular | Leve a construção do futuro para sua região</title>
     <link rel="icon" href="./assets/logo-321modular.svg" type="image/svg+xml" />
-    <link rel="preload" href="./assets/Montserrat-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="stylesheet" href="./styles.css?v=continuous-journey-99" />
+    <link rel="preload" href="./assets/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./styles.css?v=continuous-journey-117" />
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
@@ -73,7 +73,7 @@
         <g class="logistics-scene site-top-scene">
           <path d="M45 78l755-25 62 578-790 34z" fill="url(#terrain-top)"/>
           <path d="M56 520c205-35 285-13 414 87" class="site-access-road"/>
-          <g class="site-trees"><g transform="translate(110 145)"><circle r="52"/><circle cx="34" cy="22" r="38"/><circle cx="-28" cy="30" r="34"/></g><g transform="translate(770 130)"><circle r="48"/><circle cx="-35" cy="20" r="32"/></g><g transform="translate(790 560)"><circle r="55"/><circle cx="-44" cy="-12" r="34"/></g></g>
+          <g class="site-trees"><use href="#forest-09-1" x="38" y="73" width="144" height="144"/><use href="#forest-09-5" x="710" y="70" width="120" height="120"/><use href="#forest-09-6" x="722" y="492" width="136" height="136"/></g>
           <g class="site-pad"><rect x="520" y="185" width="235" height="345" rx="26" fill="#f4f2e9" stroke="#1f331b" stroke-opacity=".22" stroke-width="8"/><path d="M555 222h165v270H555z" fill="none" stroke="#628852" stroke-width="5" stroke-dasharray="16 13"/><circle cx="555" cy="222" r="10"/><circle cx="720" cy="222" r="10"/><circle cx="555" cy="492" r="10"/><circle cx="720" cy="492" r="10"/></g>
           <g class="arrival-top-truck" transform="translate(-270 455)"><use href="#truck-top" width="300" height="155"/><g transform="translate(36 38)"><use href="#module-top" width="142" height="42"/><use href="#module-top" y="44" width="142" height="42"/></g></g>
           <line class="munck-top-arm" x1="405" y1="525" x2="405" y2="525"/>
@@ -91,6 +91,50 @@
 
     <div class="site-journey" data-site-journey aria-hidden="true">
       <svg class="site-journey-route" data-journey-svg preserveAspectRatio="none">
+        <defs>
+          <!-- Option 09: native vectors shared by every grove; no bitmap or filters. -->
+          <clipPath id="forest-viewport-clip"><rect x="0" y="0" width="100%" height="100%"/></clipPath>
+          <symbol id="forest-09-1" viewBox="-100 -100 200 200">
+            <path fill="#385331" d="M-26-77C-8-94 18-89 29-72 51-78 70-64 71-44 93-34 96-9 80 7 88 30 71 51 51 53 43 79 19 88 0 74-24 88-46 74-50 55-78 55-89 31-78 12-96-6-86-35-65-41-65-65-47-81-26-77Z"/>
+            <path fill="#64834e" d="M-61-39C-76-61-45-80-28-67-29-87 11-87 15-67 34-82 61-68 57-47 80-45 88-16 67-5 75 16 55 36 34 26 22 44-2 38-9 22-29 40-54 27-52 7-79 8-87-23-61-39Z"/>
+            <path fill="none" stroke="#b59450" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M0 67-2 16 5-17 1-49M-2 20-29-1-43-30M-28-1-53-5M1 8 30-10 49-34M29-10 54 0M5-17-16-34-20-55"/>
+            <path fill="#7d985f" d="M-52-48C-56-64-30-71-23-53-15-41-36-27-44-36-65-30-71-45-52-48ZM10-60C10-77 41-79 43-58 53-39 23-29 18-42 0-40-6-55 10-60Z"/>
+          </symbol>
+          <symbol id="forest-09-2" viewBox="-100 -100 200 200">
+            <path fill="#304c2d" d="M-42-64C-28-90-2-88 14-70 39-84 61-69 61-49 89-45 99-18 80 0 92 21 75 47 54 47 52 71 27 83 9 69-11 90-42 79-46 57-71 68-91 42-78 20-99 0-90-29-67-35-75-56-60-69-42-64Z"/>
+            <path fill="#597746" d="M-55-48C-59-71-25-83-12-60 5-79 33-71 35-51 60-66 81-42 67-24 88-9 69 21 47 16 43 37 18 43 6 23-12 45-42 31-42 13-68 25-87-3-69-19-84-35-73-52-55-48Z"/>
+            <path fill="none" stroke="#ac8c4b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M-5 65 1 16-4-22-20-49M1 16 28-7 46-38M28-7 57-4M-1 0-30-18-48-16M-4-22 13-44 16-60M-30-18-32-40"/>
+            <path fill="#739157" d="M-48-56C-42-74-19-69-18-56-4-48-14-27-32-31-52-29-62-43-48-56ZM22-52C29-69 52-65 52-47 70-38 54-16 42-23 21-13 9-35 22-52Z"/>
+          </symbol>
+          <symbol id="forest-09-5" viewBox="-100 -100 200 200">
+            <path fill="#35502e" d="M-31-74C-13-94 13-88 22-73 42-85 66-69 64-46 85-39 93-15 77 2 90 24 73 49 50 47 46 73 21 86 0 71-20 90-49 72-48 51-73 59-91 35-77 13-95-7-86-32-64-38-70-59-52-79-31-74Z"/>
+            <path fill="#60804a" d="M-48-50C-58-71-23-84-10-64 6-83 33-75 34-54 56-69 77-43 62-28 84-13 69 17 47 13 42 35 16 41 4 22-14 38-41 31-42 9-68 18-82-8-66-24-77-43-61-59-48-50Z"/>
+            <path fill="none" stroke="#b59450" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M3 66 0 26-9-7-4-40 4-59M0 26 27 5 43-25M27 5 53 4M-9-7-37-23-48-44M-37-23-56-20M-6-29 17-42 21-58"/>
+            <path fill="#7c975e" d="M-41-53C-37-73-14-69-14-51-1-34-29-23-37-39-57-32-63-51-41-53ZM22-47C25-68 51-66 51-45 66-35 50-15 38-24 17-16 9-37 22-47Z"/>
+          </symbol>
+          <symbol id="forest-09-6" viewBox="-100 -100 200 200">
+            <path fill="#3a5531" d="M-36-66C-22-89 4-88 17-68 39-83 64-68 61-47 87-46 98-18 81 0 95 21 80 47 55 48 55 70 28 84 10 69-10 88-38 81-44 59-71 67-91 43-80 23-99 9-94-20-73-29-81-51-60-72-36-66Z"/>
+            <path fill="#66844e" d="M-55-37C-65-60-35-78-20-58-7-79 24-75 26-54 49-68 71-45 57-27 81-16 75 14 53 16 45 39 18 39 8 22-13 41-42 29-40 7-68 21-84-8-63-23Z"/>
+            <path fill="none" stroke="#b89a58" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M-3 69 4 30 1-8 7-34 1-57M4 30-21 9-39-14M-21 9-47 10M1-8 31-23 46-43M31-23 54-17M5-24-17-42-22-56"/>
+            <path fill="#819c62" d="M-44-49C-43-68-18-71-16-51 0-41-15-21-29-32-52-26-61-44-44-49ZM15-54C20-70 42-65 43-49 62-42 52-19 34-25 16-15 3-40 15-54Z"/>
+          </symbol>
+          <!-- Single-path, dark rear canopies fill gaps without blur filters. -->
+          <symbol id="forest-09-7" viewBox="-100 -100 200 200">
+            <path fill="#203721" d="M-32-72C-11-88 11-82 22-67 44-79 67-61 63-42 87-35 93-8 74 7 83 31 64 55 43 49 32 77 3 86-14 66-25 82-57 70-57 49-84 44-91 19-74 3-94-18-78-47-58-46-61-68-44-79-32-72Z"/>
+          </symbol>
+          <symbol id="forest-09-8" viewBox="-100 -100 200 200">
+            <path fill="#243d25" d="M-50-56C-40-81-13-87 5-67 28-84 57-70 58-44 85-43 98-14 78 4 90 27 68 55 47 48 40 75 12 85-4 67-25 85-54 66-52 48-81 57-95 23-76 6-95-12-83-40-60-38Z"/>
+          </symbol>
+          <symbol id="forest-09-3" viewBox="-100 -100 200 200">
+            <path fill="#29462a" d="M-32-72C-11-88 11-82 22-67 44-79 67-61 63-42 87-35 93-8 74 7 83 31 64 55 43 49 32 77 3 86-14 66-25 82-57 70-57 49-84 44-91 19-74 3-94-18-78-47-58-46-61-68-44-79-32-72Z"/>
+            <path fill="#3c5a34" d="M-48-39C-51-61-21-74-9-56 12-73 38-60 37-40 66-44 80-14 56 1 65 24 38 41 20 28 0 46-26 35-26 15-54 28-76 3-59-14-74-27-61-44-48-39Z"/>
+          </symbol>
+          <symbol id="forest-09-4" viewBox="-100 -100 200 200">
+            <path fill="#314c2b" d="M-50-56C-40-81-13-87 5-67 28-84 57-70 58-44 85-43 98-14 78 4 90 27 68 55 47 48 40 75 12 85-4 67-25 85-54 66-52 48-81 57-95 23-76 6-95-12-83-40-60-38Z"/>
+            <path fill="#4b693b" d="M-42-45C-34-66-11-66 0-49 20-65 44-49 41-30 69-32 76-3 53 11 54 33 24 38 12 21-7 39-35 29-33 9-59 19-75-9-56-23-68-38-55-51-42-45Z"/>
+          </symbol>
+        </defs>
+        <g class="journey-forest" data-journey-forest clip-path="url(#forest-viewport-clip)"></g>
         <path class="journey-route-bed" data-journey-route></path>
         <path class="journey-route-dash" data-journey-route-dash></path>
         <path class="journey-route-progress" data-journey-route-progress></path>
@@ -162,9 +206,26 @@
       </section>
       </div>
 
-      <section class="manifesto section-pad" id="oportunidade" data-motion-section data-motion-tone="light"><div class="section-shell manifesto-grid">
+      <section class="company-story section-pad" id="empresa" data-motion-section data-motion-tone="light" aria-labelledby="company-title"><div class="section-shell company-grid">
+        <div class="company-copy">
+          <p class="eyebrow">Nossa história · Desde 1985</p>
+          <div class="company-years"><strong>40<span>+</span></strong><span>anos de<br />experiência</span></div>
+          <h2 id="company-title">Uma história sólida. Um novo jeito de construir.</h2>
+          <p>A 321 Modular nasceu da experiência do Grupo Pacheco, que atua desde 1985 no setor madeireiro e na construção de casas em madeira.</p>
+          <p>Essa trajetória reúne pessoas, conhecimento do material e estrutura industrial. Hoje, ela se conecta à tecnologia modular para transformar projeto, produção e montagem em um sistema coordenado.</p>
+          <a class="text-link" href="https://321modular.com/" target="_blank" rel="noopener noreferrer">Conheça a 321 Modular <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="company-photos">
+          <figure><div class="photo-blend"><img src="./assets/empresa-madeira-1600.webp" srcset="./assets/empresa-madeira-800.webp 800w, ./assets/empresa-madeira-1600.webp 1600w" sizes="(max-width: 720px) calc(100vw - 124px), 43vw" width="1600" height="1066" loading="lazy" decoding="async" alt="Equipe reunida no galpão da empresa" /></div><figcaption><span>01 / Pessoas</span>Uma história construída em equipe.</figcaption></figure>
+          <figure><div class="photo-blend"><img src="./assets/empresa-industria-1600.webp" srcset="./assets/empresa-industria-800.webp 800w, ./assets/empresa-industria-1600.webp 1600w" sizes="(max-width: 720px) calc(100vw - 124px), 43vw" width="1600" height="1200" loading="lazy" decoding="async" alt="Vista aérea da estrutura industrial e do pátio da empresa" /></div><figcaption><span>02 / Estrutura</span>A base industrial por trás de cada entrega.</figcaption></figure>
+        </div>
+      </div></section>
+
+      <section class="manifesto section-pad" id="oportunidade" data-motion-section data-motion-tone="dark">
+        <picture class="manifesto-backdrop" aria-hidden="true"><source media="(max-width: 720px)" srcset="./assets/chale-sistema-800.webp" /><img src="./assets/chale-sistema-1600.webp" width="1600" height="1067" alt="" loading="lazy" decoding="async" /></picture>
+        <div class="section-shell manifesto-grid">
         <div><p class="eyebrow">A oportunidade</p><h2>Você comercializa uma solução. A 321 Modular entrega um sistema.</h2></div>
-        <div class="manifesto-copy"><p>Construção modular não é apenas uma forma diferente de construir. É uma maneira mais coordenada de transformar projeto, produção, logística e montagem em uma entrega previsível para o cliente.</p><p>Como franqueado, você desenvolve o mercado da sua região com o método, os padrões e o suporte de uma marca especializada em construções industrializadas de madeira.</p><a class="text-link" href="#modelo">Entender o modelo <span aria-hidden="true">↗</span></a></div>
+        <div class="manifesto-copy liquid-glass-panel"><p>Construção modular não é apenas uma forma diferente de construir. É uma maneira mais coordenada de transformar projeto, produção, logística e montagem em uma entrega previsível para o cliente.</p><p>Como franqueado, você desenvolve o mercado da sua região com o método, os padrões e o suporte de uma marca especializada em construções industrializadas de madeira.</p><a class="text-link" href="#modelo">Entender o modelo <span aria-hidden="true">↗</span></a></div>
       </div></section>
 
       <section class="pillars" id="modelo" data-motion-section data-motion-tone="dark"><div class="section-shell">
@@ -180,38 +241,38 @@
       <section class="chalet-showcase section-pad" id="chales" data-motion-section data-motion-tone="dark"><div class="section-shell">
         <div class="chalet-showcase-heading">
           <div><p class="eyebrow light">Chalés 321 Modular</p><h2>Arquitetura que transforma terreno em destino.</h2></div>
-          <div><p>Produtos com presença visual, vocação para hospitalidade e uma linguagem arquitetônica reconhecível — do campo à serra.</p><a class="text-link light" href="https://www.instagram.com/321modular/" target="_blank" rel="noopener">Ver projetos no Instagram <span aria-hidden="true">↗</span></a></div>
+          <div><p class="market-highlight">Moradia, lazer e negócios.<br /><strong>O turismo de experiência amplia as possibilidades.</strong></p><p>Arquitetura e produção industrializada para diferentes usos — da residência à hospitalidade.</p><a class="text-link light" href="https://www.instagram.com/321modular/" target="_blank" rel="noopener">Ver projetos no Instagram <span aria-hidden="true">↗</span></a></div>
         </div>
         <div class="chalet-gallery">
-          <figure class="chalet-photo chalet-photo--wide"><img src="./assets/chale-instagram-01.jpg" alt="Chalé A-frame 321 Modular visto em perspectiva, com estrutura de madeira e ampla fachada de vidro" loading="lazy" /><figcaption><span>Modelo A-frame</span><strong>Presença que valoriza a experiência.</strong></figcaption></figure>
-          <figure class="chalet-photo"><img src="./assets/chale-instagram-02.jpg" alt="Chalé A-frame 321 Modular finalizado, com deck frontal e fachada envidraçada" loading="lazy" /><figcaption><span>Hospitalidade</span><strong>Compacto no terreno. Marcante na paisagem.</strong></figcaption></figure>
-          <figure class="chalet-photo"><img src="./assets/chale-instagram-03.jpg" alt="Detalhe frontal de chalé A-frame 321 Modular com revestimento em madeira" loading="lazy" /><figcaption><span>Identidade 321</span><strong>Materiais e proporções pensados em conjunto.</strong></figcaption></figure>
+          <figure class="chalet-photo chalet-photo--wide"><img src="./assets/chale-instagram-01-1600.webp" srcset="./assets/chale-instagram-01-800.webp 800w, ./assets/chale-instagram-01-1600.webp 1600w" sizes="(max-width: 720px) calc(100vw - 124px), 48vw" width="1600" height="1067" alt="Chalé A-frame 321 Modular visto em perspectiva, com estrutura de madeira e ampla fachada de vidro" loading="lazy" decoding="async" /><figcaption><span>Modelo A-frame</span><strong>Presença que valoriza a experiência.</strong></figcaption></figure>
+          <figure class="chalet-photo"><img src="./assets/chale-instagram-02-1600.webp" srcset="./assets/chale-instagram-02-800.webp 800w, ./assets/chale-instagram-02-1600.webp 853w" sizes="(max-width: 720px) calc(100vw - 124px), 40vw" width="853" height="1137" alt="Chalé A-frame 321 Modular finalizado, com deck frontal e fachada envidraçada" loading="lazy" decoding="async" /><figcaption><span>Hospitalidade</span><strong>Compacto no terreno. Marcante na paisagem.</strong></figcaption></figure>
+          <figure class="chalet-photo"><img src="./assets/chale-instagram-03-1600.webp" srcset="./assets/chale-instagram-03-800.webp 800w, ./assets/chale-instagram-03-1600.webp 1320w" sizes="(max-width: 720px) calc(100vw - 124px), 40vw" width="1320" height="1760" alt="Detalhe frontal de chalé A-frame 321 Modular com revestimento em madeira" loading="lazy" decoding="async" /><figcaption><span>Identidade 321</span><strong>Materiais e proporções pensados em conjunto.</strong></figcaption></figure>
         </div>
       </div></section>
 
       <section class="testimonials section-pad" id="franqueados" data-motion-section data-motion-tone="light"><div class="section-shell">
         <div class="testimonials-heading">
           <div><p class="eyebrow">Quem já opera</p><h2>Uma rede construída por quem acredita no método.</h2></div>
-          <div class="testimonials-intro"><p>Histórias locais ajudam a mostrar como o modelo ganha forma em diferentes regiões e perfis de operação.</p><span class="content-status">Conteúdo provisório para aprovação visual — substituir pelos depoimentos reais antes da publicação comercial.</span></div>
+          <div class="testimonials-intro"><p>Histórias locais ajudam a mostrar como o modelo ganha forma em diferentes regiões e perfis de operação.</p></div>
         </div>
         <div class="testimonials-grid">
           <article class="testimonial-card testimonial-card--featured">
             <span class="testimonial-quote" aria-hidden="true">“</span>
             <blockquote>O método trouxe clareza para organizar o comercial, apresentar o produto e desenvolver a região com mais segurança.</blockquote>
-            <footer><span class="testimonial-avatar" aria-hidden="true">MC</span><span><strong>Marina Costa</strong><small>Franqueada · Serra Gaúcha, RS</small></span></footer>
+            <footer><span class="testimonial-avatar" aria-hidden="true">LR</span><span><strong>Lucas Rabelo</strong><small>Franqueado · Palhoça-SC e Araranguá-SC</small></span></footer>
             <span class="testimonial-tag">Operação regional</span>
           </article>
           <div class="testimonials-corridor" aria-hidden="true"></div>
           <article class="testimonial-card">
             <span class="testimonial-quote" aria-hidden="true">“</span>
             <blockquote>A combinação entre engenharia, padrão de marca e suporte encurtou decisões importantes na implantação da unidade.</blockquote>
-            <footer><span class="testimonial-avatar" aria-hidden="true">EN</span><span><strong>Eduardo Nunes</strong><small>Franqueado · Sul de Minas, MG</small></span></footer>
+            <footer><span class="testimonial-avatar" aria-hidden="true">LM</span><span><strong>Lucas Miranda</strong><small>Franqueado · Ribeirão Preto-SP</small></span></footer>
             <span class="testimonial-tag">Implantação</span>
           </article>
           <article class="testimonial-card">
             <span class="testimonial-quote" aria-hidden="true">“</span>
             <blockquote>O chalé chama atenção, mas é o processo por trás dele que sustenta uma experiência consistente para o cliente.</blockquote>
-            <footer><span class="testimonial-avatar" aria-hidden="true">CR</span><span><strong>Camila Rocha</strong><small>Franqueada · Região dos Lagos, RJ</small></span></footer>
+            <footer><span class="testimonial-avatar" aria-hidden="true">T</span><span><strong>Tiago</strong><small>Franqueado · Blumenau-SC</small></span></footer>
             <span class="testimonial-tag">Experiência do cliente</span>
           </article>
         </div>
@@ -224,22 +285,25 @@
           <li><span>02</span><div><h3>Conversa de qualificação</h3><p>Alinhamento inicial sobre operação, expectativas e aderência ao modelo.</p></div></li>
           <li><span>03</span><div><h3>Apresentação da oportunidade</h3><p>Detalhamento do negócio, suporte, território e estrutura necessária.</p></div></li>
           <li><span>04</span><div><h3>Análise da COF</h3><p>Recebimento e avaliação da Circular de Oferta de Franquia nos prazos aplicáveis.</p></div></li>
-          <li><span>05</span><div><h3>Implantação e treinamento</h3><p>Preparação da unidade e desenvolvimento do mercado regional com acompanhamento.</p></div></li>
+          <li><span>05</span><div><h3>Contrato de franquia</h3><p>Após a análise da COF e o cumprimento dos prazos aplicáveis, formalização das condições, responsabilidades e território no contrato de franquia.</p></div></li>
+          <li><span>06</span><div><h3>Implantação e treinamento</h3><p>Preparação da unidade e desenvolvimento do mercado regional com acompanhamento.</p></div></li>
         </ol>
       </div></section>
 
       <section class="comparison section-pad" id="vantagens" data-motion-section data-motion-tone="light"><div class="section-shell">
-        <div class="section-heading horizontal dark-text"><div><p class="eyebrow">Sistema construtivo</p><h2>Industrializar para coordenar melhor.</h2></div><p>A comparação deve ser técnica, honesta e baseada no escopo real de cada projeto.</p></div>
+        <div class="section-heading horizontal dark-text"><div><p class="eyebrow">Sistema construtivo</p><h2>Industrializar para <em>coordenar melhor.</em></h2></div><div class="comparison-summary"><p>Menos etapas concentradas na obra. Mais coordenação entre projeto, fábrica e montagem.</p></div></div>
         <div class="comparison-table" role="table" aria-label="Comparativo de sistemas construtivos">
-          <div class="comparison-row head" role="row"><span>Critério</span><span>Obra convencional</span><span>Sistema 321 Modular</span></div>
+          <div class="comparison-row head" role="row"><span role="columnheader">Critério</span><span role="columnheader"><i class="comparison-cross" aria-hidden="true">×</i><b>Obra<br />convencional</b></span><span role="columnheader"><i class="comparison-check" aria-hidden="true">✓</i><b>Sistema<br />321 Modular</b></span></div>
           <div class="comparison-row" role="row"><strong>Produção</strong><span>Predominantemente no canteiro</span><span>Etapas industrializadas e montagem no terreno</span></div>
           <div class="comparison-row" role="row"><strong>Padronização</strong><span>Varia conforme equipe e obra</span><span>Componentes e processos coordenados</span></div>
           <div class="comparison-row" role="row"><strong>Exposição ao clima</strong><span>Maior durante a execução</span><span>Parte da produção em ambiente controlado</span></div>
           <div class="comparison-row" role="row"><strong>Organização do terreno</strong><span>Mais etapas concentradas no local</span><span>Montagem planejada após preparação prévia</span></div>
-        </div><p class="comparison-note">Prazos e condições variam conforme projeto, terreno, licenças, logística e escopo contratado.</p>
+        </div>
       </div></section>
 
-      <section class="profile section-pad" id="perfil" data-motion-section data-motion-tone="dark"><div class="section-shell profile-grid">
+      <section class="profile section-pad" id="perfil" data-motion-section data-motion-tone="dark">
+        <picture class="profile-backdrop" aria-hidden="true"><source media="(max-width: 720px)" srcset="./assets/perfil-franqueado-800.webp" /><img src="./assets/perfil-franqueado-1600.webp" width="1600" height="1066" alt="" loading="lazy" decoding="async" /></picture>
+        <div class="section-shell profile-grid">
         <div class="profile-visual" aria-hidden="true"><span class="profile-ring ring-one"></span><span class="profile-ring ring-two"></span><div class="profile-mark">3<span>2</span><b>1</b></div><p>Empreender<br />Construir<br />Expandir</p></div>
         <div class="profile-content"><p class="eyebrow light">Perfil do franqueado</p><h2>Para quem quer construir mercado, não apenas esperar clientes.</h2><div class="profile-items"><div><span>01</span><p>Perfil empreendedor e capacidade de gestão local.</p></div><div><span>02</span><p>Atuação comercial e relacionamento com a região.</p></div><div><span>03</span><p>Compromisso com processos, marca e padrão de entrega.</p></div><div><span>04</span><p>Capital compatível com a estrutura definida na COF.</p></div></div></div>
       </div></section>
@@ -251,7 +315,7 @@
         <div class="territory-expansion">
           <figure class="brazil-map-card">
             <div class="brazil-map-stage" role="img" aria-label="Mapa do Brasil destacando Lajeado, Cascavel, Pato Branco, Maringá, Guarapuava, Ponta Grossa, Curitiba, Joinville, Bragança Paulista e Videira">
-              <img src="./assets/brazil-states-map-natural-earth.svg" alt="Mapa detalhado do Brasil com dez cidades prioritárias da expansão 321 Modular sinalizadas" />
+              <img src="./assets/brazil-states-map-natural-earth.svg" width="900" height="900" loading="lazy" decoding="async" alt="Mapa detalhado do Brasil com dez cidades prioritárias da expansão 321 Modular sinalizadas" />
               <span class="city-pin" style="--pin-x:48.98%;--pin-y:85.14%" data-city="Lajeado · RS" aria-hidden="true"></span>
               <span class="city-pin" style="--pin-x:46%;--pin-y:74.73%" data-city="Cascavel · PR" aria-hidden="true"></span>
               <span class="city-pin" style="--pin-x:47.56%;--pin-y:77.67%" data-city="Pato Branco · PR" aria-hidden="true"></span>
@@ -279,13 +343,21 @@
       </div></section>
 
       <section class="faq section-pad" id="duvidas" data-motion-section data-motion-tone="light"><div class="section-shell faq-grid">
-        <div class="faq-intro"><p class="eyebrow">Perguntas frequentes</p><h2>Antes de falar com expansão.</h2><p>Informações financeiras e contratuais definitivas serão apresentadas nos documentos oficiais da franquia.</p></div>
+        <div class="faq-intro">
+          <div class="faq-intro-copy">
+          <p class="eyebrow">Perguntas frequentes</p>
+          <h2>Antes de falar com <span class="faq-title-word">expansão.</span></h2>
+          <p class="faq-intro-note">Conheça as condições iniciais. A composição do investimento, as projeções e as obrigações serão detalhadas nos documentos oficiais da franquia.</p>
+          </div>
+          <picture class="faq-backdrop" aria-hidden="true"><img src="./assets/chale-faq-expandido-992.webp" srcset="./assets/chale-faq-expandido-600.webp 600w, ./assets/chale-faq-expandido-992.webp 992w" sizes="(max-width: 720px) calc(100vw - 106px), 35vw" width="992" height="1586" alt="" loading="lazy" decoding="async" /></picture>
+        </div>
         <div class="faq-list">
           <details><summary aria-controls="faq-answer-1">Preciso ter experiência em construção?<span>+</span></summary><div class="faq-answer" id="faq-answer-1"><div><p>O perfil será avaliado de forma ampla. Experiência comercial, capacidade de gestão e aderência ao método são importantes; os requisitos definitivos fazem parte do processo de seleção.</p></div></div></details>
           <details><summary aria-controls="faq-answer-2">Como funciona a exclusividade territorial?<span>+</span></summary><div class="faq-answer" id="faq-answer-2"><div><p>A região é analisada conforme potencial de mercado, disponibilidade e regras previstas nos documentos da franquia.</p></div></div></details>
-          <details><summary aria-controls="faq-answer-3">Qual é o investimento inicial?<span>+</span></summary><div class="faq-answer" id="faq-answer-3"><div><p>A composição completa — incluindo taxa, implantação, equipamentos e capital de giro — deve coincidir com a COF vigente e será apresentada pela equipe de expansão.</p></div></div></details>
+          <details><summary aria-controls="faq-answer-3">Qual é o investimento inicial?<span>+</span></summary><div class="faq-answer" id="faq-answer-3"><div><p>O investimento é a partir de <strong>R$ 380 mil</strong>. A composição completa, os itens incluídos e as condições da unidade serão apresentados pela equipe de expansão e detalhados na COF.</p></div></div></details>
           <details><summary aria-controls="faq-answer-4">Quem cuida da produção e da montagem?<span>+</span></summary><div class="faq-answer" id="faq-answer-4"><div><p>As responsabilidades variam conforme o produto e o contrato. A apresentação comercial detalha o papel da franqueadora, do franqueado, dos fornecedores e do cliente.</p></div></div></details>
-          <details><summary aria-controls="faq-answer-5">Em quanto tempo a unidade começa a operar?<span>+</span></summary><div class="faq-answer" id="faq-answer-5"><div><p>O cronograma depende de seleção, análise documental, território, estrutura, treinamento e implantação. A equipe apresentará uma estimativa baseada no caso real.</p></div></div></details>
+          <details><summary aria-controls="faq-answer-5">Em quanto tempo a unidade começa a operar?<span>+</span></summary><div class="faq-answer" id="faq-answer-5"><div><p>O prazo estimado de implantação é de <strong>90 dias</strong>, conforme o cronograma acordado. A data de início e as etapas de estruturação, treinamento e preparação da unidade serão alinhadas com a equipe de expansão.</p></div></div></details>
+          <details><summary aria-controls="faq-answer-6">Qual é o prazo de retorno do investimento?<span>+</span></summary><div class="faq-answer" id="faq-answer-6"><div><p>O payback estimado é de <strong>12 meses</strong>. Trata-se de uma projeção, não de uma garantia de retorno: o resultado depende de vendas, custos, gestão e condições do mercado local. As premissas serão apresentadas durante a análise da oportunidade.</p></div></div></details>
         </div>
       </div></section>
 
@@ -304,7 +376,11 @@
                 <path class="destination-road-dash" data-destination-road-path data-destination-road-dash d="M250-35C250 140 240 290 210 390C193 438 195 470 220 490C232 500 248 503 265 503" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="15 20"/>
                 <path class="destination-road-orange" data-destination-road-orange d="M250-35C250 140 240 290 210 390C193 438 195 470 220 490C232 500 248 503 265 503" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 1"/>
               </g>
-              <g fill="#4f7747" stroke="#83a878" stroke-width="5"><circle cx="75" cy="115" r="42"/><circle cx="550" cy="105" r="48"/><circle cx="570" cy="520" r="55"/></g>
+              <g class="destination-trees">
+                <use href="#forest-09-1" x="22" y="62" width="106" height="106"/>
+                <use href="#forest-09-5" x="490" y="45" width="120" height="120"/>
+                <use href="#forest-09-6" x="502" y="452" width="136" height="136"/>
+              </g>
               <rect x="350" y="135" width="190" height="330" rx="24" fill="#f4f2e9" stroke="#1f331b" stroke-opacity=".2" stroke-width="8"/>
               <path d="M382 170h126v260H382z" fill="none" stroke="#628852" stroke-width="5" stroke-dasharray="15 13"/>
               <g class="destination-roof" data-destination-roof>
@@ -331,8 +407,8 @@
           <div class="field-row"><label>Nome completo<input name="nome" required autocomplete="name" placeholder="Seu nome" /></label><label>WhatsApp<input name="whatsapp" type="tel" required autocomplete="tel-national" inputmode="numeric" maxlength="15" pattern="\(\d{2}\) \d{4,5}-\d{4}" placeholder="(00) 00000-0000" /></label></div>
           <label>E-mail<input name="email" type="email" required autocomplete="email" inputmode="email" spellcheck="false" placeholder="voce@empresa.com.br" /></label>
           <div class="field-row"><label>Estado<select name="estado" required><option value="">Selecione o estado</option><option value="AC">Acre (AC)</option><option value="AL">Alagoas (AL)</option><option value="AP">Amapá (AP)</option><option value="AM">Amazonas (AM)</option><option value="BA">Bahia (BA)</option><option value="CE">Ceará (CE)</option><option value="DF">Distrito Federal (DF)</option><option value="ES">Espírito Santo (ES)</option><option value="GO">Goiás (GO)</option><option value="MA">Maranhão (MA)</option><option value="MT">Mato Grosso (MT)</option><option value="MS">Mato Grosso do Sul (MS)</option><option value="MG">Minas Gerais (MG)</option><option value="PA">Pará (PA)</option><option value="PB">Paraíba (PB)</option><option value="PR">Paraná (PR)</option><option value="PE">Pernambuco (PE)</option><option value="PI">Piauí (PI)</option><option value="RJ">Rio de Janeiro (RJ)</option><option value="RN">Rio Grande do Norte (RN)</option><option value="RS">Rio Grande do Sul (RS)</option><option value="RO">Rondônia (RO)</option><option value="RR">Roraima (RR)</option><option value="SC">Santa Catarina (SC)</option><option value="SP">São Paulo (SP)</option><option value="SE">Sergipe (SE)</option><option value="TO">Tocantins (TO)</option></select></label><label>Cidade<input name="cidade" required autocomplete="off" aria-autocomplete="list" placeholder="Selecione o estado primeiro" disabled /></label></div>
-          <label>Capital disponível para investimento<select name="capital" required><option value="">Selecione uma faixa</option><option>Faixa a definir com a franqueadora</option><option>Prefiro conversar com expansão</option></select></label>
-          <label>Quando pretende investir?<select name="prazo" required><option value="">Selecione</option><option>Em até 3 meses</option><option>De 3 a 6 meses</option><option>De 6 a 12 meses</option><option>Ainda estou avaliando</option></select></label>
+          <label>Tipo de recurso para o investimento<select name="recurso_investimento" required><option value="">Selecione o tipo de recurso</option><option value="recursos-proprios">Recursos próprios</option><option value="financiamento">Financiamento</option></select></label>
+          <label>Qual será seu nível de envolvimento na operação?<select name="envolvimento_operacao" required><option value="">Selecione seu perfil de atuação</option><option value="investidor">Investidor, sem atuação na operação diária</option><option value="parcial">Dedicação parcial, conciliando outros negócios</option><option value="integral">Dedicação integral à operação da franquia</option></select></label>
           <label class="consent"><input type="checkbox" required /><span>Autorizo o contato da equipe 321 Modular e declaro ter lido o aviso de privacidade.</span></label>
           <button class="button button-primary submit-button" type="submit">Quero falar com expansão <span aria-hidden="true">↗</span></button><p class="form-message" id="form-message" role="status" hidden></p>
           <p class="form-legal">Esta página não substitui a Circular de Oferta de Franquia. Condições, valores e obrigações serão apresentados na documentação oficial.</p>
@@ -347,6 +423,6 @@
         <img src="./logo-horizontal-light.svg" alt="Rafael Stork Design" />
       </a>
     </p>
-    <script defer src="./app.js?v=continuous-journey-99"></script>
+    <script defer src="./app.js?v=continuous-journey-117"></script>
   </body>
 </html>
