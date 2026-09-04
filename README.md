@@ -2,6 +2,13 @@
 
 Site estático e sem etapa de build, preparado para rodar diretamente no GitHub Pages.
 
+## Revisão V0.0.119 — restauração da V0.0.117
+
+- V0.0.118 mantida integralmente no ZIP arquivado, incluindo a revisão editorial e seu teste. Os cortes de texto e ajustes de espaçamento daquela revisão foram desfeitos.
+- Site restaurado a partir da V0.0.117. Única alteração de conteúdo: resposta “Quem cuida da produção e da montagem?”, com as responsabilidades da indústria, do franqueado e da franqueadora e a explicação fornecida pelo usuário.
+- Sem mudanças de layout, imagens ou animação em relação à V0.0.117. Atualizados apenas o identificador de cache, este histórico e o teste da nova resposta.
+- Validação por comparação com o arquivo da V0.0.117 e testes automatizados; sem inspeção visual em navegador nesta revisão.
+
 ## Revisão V0.0.117
 
 - Caixa de “A oportunidade” novamente contida na largura central da seção, sem margem negativa: o recuo direito acompanha o esquerdo do título.
